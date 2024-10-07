@@ -2,13 +2,14 @@ package config
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/caarlos0/env/v11"
 	"github.com/joho/godotenv"
-	"log"
-	path "github.com/forest-shadow/calendar/internal/constants"
 )
 
 type Config struct {
+	DB       DBConfig
 	HTTP     HTTPConfig
 }
 	
@@ -16,14 +17,17 @@ type HTTPConfig struct {
 	Port int `env:"HTTP_PORT" envDefault:"8089"`
 }
 
+type DBConfig struct {
+	URI string `env:"DB_URI" envDefault:"postgresql://postgres:password@localhost:5555/auth"`
+}
+
 func envLoader() {
-	if err := godotenv.Load(path.EnvFile); err != nil {
+	if err := godotenv.Load(".env"); err != nil {
 		log.Println("No .env file found")
 	}
 }
 
-
-func Parse() (*Config, error) {
+func GetConfig() (*Config, error) {
 	envLoader()
 
 	cfg := &Config{}
