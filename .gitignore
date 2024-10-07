@@ -22,7 +22,8 @@ go.work
 go.work.sum
 
 # env file
-.env
-.idea/
+.env*
+!.env.example
 
+.idea/
 __debug*
