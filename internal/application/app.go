@@ -7,12 +7,14 @@ import (
 	"github.com/forest-shadow/calendar/internal/config"
 	"github.com/forest-shadow/calendar/internal/logger"
 	"github.com/forest-shadow/calendar/internal/transport/http"
+	"github.com/forest-shadow/calendar/internal/database"
 )
 
 type App struct {
 	cfg        *config.Config
 	httpServer *http.Server
 	logger     logger.Logger
+	db         *database.DB
 }
 
 func newApp() (*App, error) {
@@ -21,7 +23,7 @@ func newApp() (*App, error) {
 		return nil, fmt.Errorf("failed to get config: %w", err)
 	}
 
-	logger, err := logger.New()
+	logger, err := logger.NewLogger()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create logger: %w", err)
 	}
@@ -31,10 +33,16 @@ func newApp() (*App, error) {
 		return nil, fmt.Errorf("failed to create http server: %w", err)
 	}
 
+	db, err := database.NewDB(&cfg.DB, logger)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create db: %w", err)
+	}
+
 	return &App{
 		cfg:        cfg,
 		httpServer: httpServer,
 		logger:     logger,
+		db:         db,
 	}, nil
 }
 
@@ -48,6 +56,11 @@ func (app *App) start() error {
 }
 
 func (app *App) shutdown() error {
+	if err := app.db.Close(); err != nil {
+		app.logger.Error("close db connection: ", err.Error())
+	}
+	app.logger.Info("db connection closed")
+	
 	if err := app.httpServer.Stop(); err != nil {
 		return fmt.Errorf("failed to stop http server: %w", err)
 	}
