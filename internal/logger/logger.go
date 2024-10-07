@@ -35,6 +35,5 @@ func New() (Logger, error) {
 		zap.AddCaller(),
 	)
 
-	zap.ReplaceGlobals(logger)
 	return logger.Sugar(), nil
 }
