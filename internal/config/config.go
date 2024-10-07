@@ -3,27 +3,37 @@ package config
 import (
 	"fmt"
 	"log"
+	"os"
+	"path/filepath"
 
 	"github.com/caarlos0/env/v11"
 	"github.com/joho/godotenv"
 )
 
 type Config struct {
-	DB       DBConfig
-	HTTP     HTTPConfig
+	DB       DB
+	HTTP     HTTP
 }
 	
-type HTTPConfig struct {
+type HTTP struct {
 	Port int `env:"HTTP_PORT" envDefault:"8089"`
 }
 
-type DBConfig struct {
+type DB struct {
 	URI string `env:"DB_URI" envDefault:"postgresql://postgres:password@localhost:5555/auth"`
 }
 
 func envLoader() {
-	if err := godotenv.Load(".env"); err != nil {
-		log.Println("No .env file found")
+	// Get the environment from GO_ENV, defaulting to 'local' if not set
+	env := os.Getenv("GO_ENV")
+	if env == "" {
+		env = "local"
+	}
+	
+	// Determine the path to the appropriate .env file
+	envPath := filepath.Join(".", fmt.Sprintf(".env.%s", env))
+	if err := godotenv.Load(envPath); err != nil {
+		log.Printf("No %v file found", envPath)
 	}
 }
 

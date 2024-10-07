@@ -22,7 +22,7 @@ const ServerShutdownTimeout = 10 * time.Second
 
 // create a new HTTP server instance
 // TODO: add - handler http.Handler
-func NewServer(cfg *config.HTTPConfig, logger logger.Logger) (*Server, error) {
+func NewServer(cfg *config.HTTP, logger logger.Logger) (*Server, error) {
 	addr := fmt.Sprintf(":%d", cfg.Port)
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
@@ -39,7 +39,7 @@ func NewServer(cfg *config.HTTPConfig, logger logger.Logger) (*Server, error) {
 }
 
 // start serving HTTP requests
-func (s *Server) Start(cfg *config.HTTPConfig) error {
+func (s *Server) Start(cfg *config.HTTP) error {
 	s.logger.Infof("Server started on port :%v", cfg.Port)
 
 	// serving HTTP requests should be in a separate goroutine cause 
