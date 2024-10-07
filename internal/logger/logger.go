@@ -25,7 +25,7 @@ var encoderConfig = zapcore.EncoderConfig{
 	EncodeCaller:   zapcore.ShortCallerEncoder,
 }
 
-func New() (Logger, error) {
+func NewLogger() (Logger, error) {
 	logger := zap.New(
 		zapcore.NewCore(
 			zapcore.NewJSONEncoder(encoderConfig),
