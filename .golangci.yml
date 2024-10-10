@@ -1,0 +1,13 @@
+linters:
+  enable:
+    - gofumpt
+    - goimports
+    - revive
+linters-settings:
+  goimports:
+    local-prefixes: github.com/forest-shadow/calendar
+run:
+  concurrency: 4
+  timeout: 1m
+  issues-exit-code: 1
+  # tests: true
