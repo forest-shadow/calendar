@@ -27,13 +27,14 @@ func envLoader() {
 	// Get the environment from GO_ENV, defaulting to 'local' if not set
 	env := os.Getenv("GO_ENV")
 	if env == "" {
+		log.Printf("GO_ENV is not set, defaulting to 'local'")
 		env = "local"
 	}
 
 	// Determine the path to the appropriate .env file
 	envPath := filepath.Join(".", fmt.Sprintf(".env.%s", env))
 	if err := godotenv.Load(envPath); err != nil {
-		log.Printf("No %v file found", envPath)
+		log.Printf("No %v file found, skipping...", envPath)
 	}
 }
 
