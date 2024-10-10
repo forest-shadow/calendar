@@ -11,8 +11,8 @@ golangci-lint run --fix
 
 # Check if there are any changes after linting
 if ! git diff --exit-code; then
-    echo "Linter made changes. Adding them to the commit."
-    git add .
+    echo "Linter made changes.\nAdding staged files changes to the commit."
+    git add -u $(git diff --name-only --cached)
 else
     echo "No changes made by the linter."
 fi
