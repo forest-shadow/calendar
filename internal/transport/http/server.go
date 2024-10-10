@@ -42,7 +42,7 @@ func NewServer(cfg *config.HTTP, logger logger.Logger) (*Server, error) {
 func (s *Server) Start(cfg *config.HTTP) error {
 	s.logger.Infof("Server started on port :%v", cfg.Port)
 
-	// serving HTTP requests should be in a separate goroutine cause 
+	// serving HTTP requests should be in a separate goroutine cause
 	// Serve() blocks the main thread
 	go func() {
 		err := s.server.Serve(s.listener)

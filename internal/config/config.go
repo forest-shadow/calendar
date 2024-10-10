@@ -11,10 +11,10 @@ import (
 )
 
 type Config struct {
-	DB       DB
-	HTTP     HTTP
+	DB   DB
+	HTTP HTTP
 }
-	
+
 type HTTP struct {
 	Port int `env:"HTTP_PORT" envDefault:"8089"`
 }
@@ -29,7 +29,7 @@ func envLoader() {
 	if env == "" {
 		env = "local"
 	}
-	
+
 	// Determine the path to the appropriate .env file
 	envPath := filepath.Join(".", fmt.Sprintf(".env.%s", env))
 	if err := godotenv.Load(envPath); err != nil {
@@ -41,7 +41,7 @@ func GetConfig() (*Config, error) {
 	envLoader()
 
 	cfg := &Config{}
-    if err := env.Parse(cfg); err != nil {
+	if err := env.Parse(cfg); err != nil {
 		return nil, fmt.Errorf("load config from env: %w", err)
 	}
 
