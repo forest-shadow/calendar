@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	// Create a context that will be canceled when the 
+	// Create a context that will be canceled when the
 	// program receives an interrupt or termination signal
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGTERM, os.Interrupt)
 	defer cancel()

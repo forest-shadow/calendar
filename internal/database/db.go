@@ -6,6 +6,7 @@ import (
 
 	"github.com/jackc/pgx"
 	"github.com/jackc/pgx/stdlib"
+
 	"github.com/forest-shadow/calendar/internal/config"
 	"github.com/forest-shadow/calendar/internal/logger"
 )

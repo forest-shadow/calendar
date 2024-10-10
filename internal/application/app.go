@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	"github.com/forest-shadow/calendar/internal/config"
+	"github.com/forest-shadow/calendar/internal/database"
 	"github.com/forest-shadow/calendar/internal/logger"
 	"github.com/forest-shadow/calendar/internal/transport/http"
-	"github.com/forest-shadow/calendar/internal/database"
 )
 
 type App struct {
@@ -55,18 +55,16 @@ func (app *App) start() error {
 	return nil
 }
 
-func (app *App) shutdown() error {
+func (app *App) shutdown() {
 	if err := app.db.Close(); err != nil {
 		app.logger.Error("close db connection: ", err.Error())
 	}
 	app.logger.Info("db connection closed")
-	
+
 	if err := app.httpServer.Stop(); err != nil {
-		return fmt.Errorf("failed to stop http server: %w", err)
+		app.logger.Errorf("failed to stop http server: %w", err)
 	}
 	app.logger.Info("Appication successfully shutted down")
-
-	return nil
 }
 
 func Run(ctx context.Context) error {
