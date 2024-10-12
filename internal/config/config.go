@@ -4,47 +4,42 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path/filepath"
 
-	"github.com/caarlos0/env/v11"
-	"github.com/joho/godotenv"
+	"github.com/spf13/viper"
 )
 
 type Config struct {
-	DB   DB
-	HTTP HTTP
+	DB   DB   `mapstructure:"db"`
+	HTTP HTTP `mapstructure:"http"`
 }
 
 type HTTP struct {
-	Port int `env:"HTTP_PORT" envDefault:"8089"`
+	Port int `mapstructure:"port"`
 }
 
 type DB struct {
-	URI string `env:"DB_URI" envDefault:"postgresql://postgres:password@localhost:5555/auth"`
+	URI string `mapstructure:"uri"`
 }
 
-func envLoader() {
-	// Get the environment from GO_ENV, defaulting to 'local' if not set
+func GetConfig() (*Config, error) {
 	env := os.Getenv("GO_ENV")
 	if env == "" {
 		log.Printf("GO_ENV is not set, defaulting to 'local'")
 		env = "local"
 	}
 
-	// Determine the path to the appropriate .env file
-	envPath := filepath.Join(".", fmt.Sprintf(".env.%s", env))
-	if err := godotenv.Load(envPath); err != nil {
-		log.Printf("No %v file found, skipping...", envPath)
-	}
-}
+	viper.SetConfigName("env." + env)
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(".")
 
-func GetConfig() (*Config, error) {
-	envLoader()
-
-	cfg := &Config{}
-	if err := env.Parse(cfg); err != nil {
-		return nil, fmt.Errorf("load config from env: %w", err)
+	if err := viper.ReadInConfig(); err != nil {
+		return nil, fmt.Errorf("error reading config file: %w", err)
 	}
 
-	return cfg, nil
+	var config Config
+	if err := viper.Unmarshal(&config); err != nil {
+		return nil, fmt.Errorf("unable to decode config into struct: %w", err)
+	}
+
+	return &config, nil
 }
