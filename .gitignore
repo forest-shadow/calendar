@@ -22,8 +22,8 @@ go.work
 go.work.sum
 
 # env file
-.env*
-!.env.example
+env.*.yml
+!env.example.yml
 
 # IDE
 .idea/
