@@ -149,3 +149,8 @@ make install-tools
 2. добавлен pre-commit git hook для исправления ошибок линтинга и добавления изменений в коммит
 3. добавлен makefile target для инициализации pre-commit hook
 4. добавлен makefile targets для линтинга и исправления ошибок линтинга
+5. использовал `viper` для конфигурации приложения вместо `godotenv` и `caarlos0/env`
+6. добавил healthcheck ручку для проверки состояния приложения
+7. обновил Dockerfile для сборки и запуска приложения на prod
+8. добавил Dockerfile image в docker-compose.yml
+9. добавил Makefile target для запуска приложения для локальной разработки и для продакшена с использованием docker-compose
