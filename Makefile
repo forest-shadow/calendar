@@ -5,10 +5,20 @@ export TOOLS=$(current_dir)/tools
 export TOOLS_BIN=$(TOOLS)/bin
 export PATH := $(TOOLS_BIN):$(PATH)
 
-.PHONY: 
+.PHONY:
+.SILENT: 
 run:
-	docker-compose up -d
+	docker-compose up postgres -d
+	echo "Waiting for PostgreSQL to be ready..."
+	until docker-compose exec -T postgres pg_isready -U postgres; do \
+		sleep 1; \
+	done
+	echo "PostgreSQL is ready"
 	go run cmd/main.go
+
+.PHONY:
+run-prod:
+	docker-compose up -d
 
 .PHONY:
 fix-lint: install-tools
@@ -19,6 +29,7 @@ lint: install-tools
 	golangci-lint run
 
 .PHONY:
+.SILENT:
 install-tools: export GOBIN=$(TOOLS_BIN)
 install-tools:
 	@if [ -d "$(TOOLS_BIN)" ] && [ -n "$$(ls -A $(TOOLS_BIN))" ]; then \
@@ -29,6 +40,7 @@ install-tools:
 	fi
 
 .PHONY:
+.SILENT:
 setup-pre-commit:
-	@chmod +x scripts/setup-pre-commit.sh
-	@./scripts/setup-pre-commit.sh
+	chmod +x scripts/setup-pre-commit.sh
+	./scripts/setup-pre-commit.sh
