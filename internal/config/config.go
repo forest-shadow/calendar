@@ -22,9 +22,9 @@ type DB struct {
 }
 
 func GetConfig() (*Config, error) {
-	env := os.Getenv("GO_ENV")
+	env := os.Getenv("APP_ENV")
 	if env == "" {
-		log.Printf("GO_ENV is not set, defaulting to 'local'")
+		log.Printf("APP_ENV is not set, defaulting to 'local'")
 		env = "local"
 	}
 
