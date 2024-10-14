@@ -22,14 +22,16 @@ const ServerShutdownTimeout = 10 * time.Second
 
 // create a new HTTP server instance
 // TODO: add - handler http.Handler
-func NewServer(cfg *config.HTTP, logger logger.Logger) (*Server, error) {
+func NewServer(cfg *config.HTTP, logger logger.Logger, router http.Handler) (*Server, error) {
 	addr := fmt.Sprintf(":%d", cfg.Port)
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create listener on %s: %w", addr, err)
 	}
 
-	server := &http.Server{}
+	server := &http.Server{
+		Handler: router,
+	}
 
 	return &Server{
 		server:   server,

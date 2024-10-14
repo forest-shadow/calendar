@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/forest-shadow/calendar/internal/config"
+	router "github.com/forest-shadow/calendar/internal/controllers/http"
 	"github.com/forest-shadow/calendar/internal/database"
 	"github.com/forest-shadow/calendar/internal/logger"
 	"github.com/forest-shadow/calendar/internal/transport/http"
@@ -28,7 +29,8 @@ func newApp() (*App, error) {
 		return nil, fmt.Errorf("failed to create logger: %w", err)
 	}
 
-	httpServer, err := http.NewServer(&cfg.HTTP, logger)
+	router := router.NewRouter(logger)
+	httpServer, err := http.NewServer(&cfg.HTTP, logger, router)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create http server: %w", err)
 	}
