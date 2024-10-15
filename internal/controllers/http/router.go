@@ -26,5 +26,6 @@ func NewRouter(
 
 func (h *handlers) build(router chi.Router) {
 	router.Use(middleware.Recoverer)
+	router.Use(middleware.Logger)
 	router.Get("/healthcheck", h.healthcheck)
 }
