@@ -17,7 +17,7 @@ run:
 	go run cmd/main.go
 
 .PHONY:
-run-prod:
+run-docker:
 	docker-compose up -d
 
 .PHONY:
@@ -32,7 +32,7 @@ lint: install-tools
 .SILENT:
 install-tools: export GOBIN=$(TOOLS_BIN)
 install-tools:
-	@if [ -d "$(TOOLS_BIN)" ] && [ -n "$$(ls -A $(TOOLS_BIN))" ]; then \
+	if [ -d "$(TOOLS_BIN)" ] && [ -n "$$(ls -A $(TOOLS_BIN))" ]; then \
 		echo "TOOLS_BIN directory exists and not empty"; \
 	else \
 		echo "TOOLS_BIN directory does not exist or is empty.\n Installing tools..."; \
