@@ -1,4 +1,12 @@
--include .env.local
+YAML_FILE=env.local.yml
+
+ifeq ($(shell which yq),)
+    $(error "yq is not installed. Please install yq to use this Makefile.")
+endif
+
+HTTP_PORT=$(shell yq eval '.http.port' $(YAML_FILE))
+DB_URI=$(shell yq eval '.db.uri' $(YAML_FILE))
+
 current_dir := $(patsubst %/,%,$(dir $(abspath $(firstword $(MAKEFILE_LIST)))))
 
 export TOOLS=$(current_dir)/tools
@@ -27,6 +35,10 @@ fix-lint: install-tools
 .PHONY:
 lint: install-tools
 	golangci-lint run
+
+.PHONY:
+test: install-tools
+	hurl --test --verbose --variable host=localhost:$(HTTP_PORT) scripts/requests/$(name).hurl
 
 .PHONY:
 .SILENT:
