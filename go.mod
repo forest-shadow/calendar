@@ -3,8 +3,11 @@ module github.com/forest-shadow/calendar
 go 1.23.0
 
 require (
+	github.com/Masterminds/squirrel v1.5.4
+	github.com/georgysavva/scany/v2 v2.1.3
 	github.com/go-chi/chi v1.5.5
 	github.com/go-chi/chi/v5 v5.1.0
+	github.com/google/uuid v1.4.0
 	github.com/jackc/pgx v3.6.2+incompatible
 	github.com/spf13/viper v1.18.0
 	go.uber.org/zap v1.27.0
@@ -16,6 +19,8 @@ require (
 	github.com/gofrs/uuid v4.4.0+incompatible // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/jackc/fake v0.0.0-20150926172116-812a484cc733 // indirect
+	github.com/lann/builder v0.0.0-20180802200727-47ae307949d0 // indirect
+	github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0 // indirect
 	github.com/lib/pq v1.10.9 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect

@@ -29,15 +29,17 @@ func newApp() (*App, error) {
 		return nil, fmt.Errorf("failed to create logger: %w", err)
 	}
 
-	router := router.NewRouter(logger)
-	httpServer, err := http.NewServer(&cfg.HTTP, logger, router)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create http server: %w", err)
-	}
-
 	db, err := database.NewDB(&cfg.DB, logger)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create db: %w", err)
+	}
+
+	eventsDomain := buildEventsDomain(db.Connection)
+
+	router := router.NewRouter(logger, eventsDomain.eventsService)
+	httpServer, err := http.NewServer(&cfg.HTTP, logger, router)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create http server: %w", err)
 	}
 
 	return &App{
