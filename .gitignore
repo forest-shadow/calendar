@@ -31,3 +31,6 @@ __debug*
 
 # go tools
 /tools
+
+# temp files
+tmp/

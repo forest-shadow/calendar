@@ -15,14 +15,14 @@ export PATH := $(TOOLS_BIN):$(PATH)
 
 .PHONY:
 .SILENT: 
-run:
+run: install-tools
 	docker-compose up postgres -d
 	echo "Waiting for PostgreSQL to be ready..."
 	until docker-compose exec -T postgres pg_isready -U postgres; do \
 		sleep 1; \
 	done
 	echo "PostgreSQL is ready"
-	go run cmd/main.go
+	$(TOOLS_BIN)/air --build.cmd "go build -o tmp/calendar cmd/main.go"
 
 .PHONY:
 run-docker:
@@ -58,6 +58,7 @@ install-tools:
 		echo "TOOLS_BIN directory does not exist or is empty.\n Installing tools..."; \
 		go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.61.0; \
 		go install github.com/pressly/goose/v3/cmd/goose@v3.22.1; \
+		go install github.com/air-verse/air@1.61.1; \
 	fi
 
 .PHONY:
