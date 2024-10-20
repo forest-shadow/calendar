@@ -9,6 +9,7 @@ require (
 	github.com/go-chi/chi/v5 v5.1.0
 	github.com/google/uuid v1.4.0
 	github.com/jackc/pgx v3.6.2+incompatible
+	github.com/rickb777/date v1.21.1
 	github.com/spf13/viper v1.18.0
 	go.uber.org/zap v1.27.0
 )
@@ -26,6 +27,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/rickb777/plural v1.4.2 // indirect
 	github.com/sagikazarmark/locafero v0.4.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect

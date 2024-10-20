@@ -19,10 +19,10 @@ type Event struct {
 }
 
 type EventUpdateDTO struct {
-	Title        *string
-	StartTime    *time.Time
-	EndTime      *time.Time
-	Description  *string
-	UserID       *uuid.UUID
-	NotifyBefore *string
+	Title        *string    `json:"title,omitempty"`
+	StartTime    *time.Time `json:"start_time,omitempty"`
+	EndTime      *time.Time `json:"end_time,omitempty"`
+	Description  *string    `json:"description,omitempty"`
+	UserID       *uuid.UUID `json:"user_id,omitempty"`
+	NotifyBefore *string    `json:"notify_before,omitempty"`
 }

@@ -19,7 +19,8 @@ PUT http://{{host}}/api/v1/events/123e4567-e89b-12d3-a456-426614174000
 
 {
   "title": "updated_event_title",
-  "description": "updated_event_description"
+  "description": "updated_event_description",
+  "notify_before": "PT20S"
 }
 
 HTTP/1.1 204

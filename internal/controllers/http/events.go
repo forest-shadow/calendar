@@ -2,11 +2,13 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 
+	"github.com/forest-shadow/calendar/internal/apperrs"
 	"github.com/forest-shadow/calendar/internal/events"
 )
 
@@ -24,6 +26,13 @@ func (h *handlers) createEvent(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.handleError(ctx, w, err)
 		return
+	}
+
+	if newEvent.NotifyBefore != nil {
+		if err := validateISO8601Duration(*newEvent.NotifyBefore); err != nil {
+			h.handleError(ctx, w, fmt.Errorf("%w: %v", apperrs.ErrConditionViolation, err))
+			return
+		}
 	}
 
 	err = h.eventService.Create(ctx, newEvent)
@@ -87,6 +96,12 @@ func (h *handlers) updateEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if event.NotifyBefore != nil {
+		if err := validateISO8601Duration(*event.NotifyBefore); err != nil {
+			h.handleError(ctx, w, fmt.Errorf("%w: %v", apperrs.ErrConditionViolation, err))
+			return
+		}
+	}
 	err = h.eventService.Update(ctx, id, event)
 	if err != nil {
 		h.handleError(ctx, w, err)
