@@ -3,6 +3,7 @@ package events
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/georgysavva/scany/v2/dbscan"
@@ -43,19 +44,6 @@ func (r *Repository) Create(ctx context.Context, event Event) error {
 	return nil
 }
 
-func (r *Repository) Delete(ctx context.Context, id string) error {
-	query := `
-		DELETE FROM events WHERE id = $1
-	`
-
-	_, err := r.db.ExecContext(ctx, query, id)
-	if err != nil {
-		return fmt.Errorf("event deletion error: %w", err)
-	}
-
-	return nil
-}
-
 func (r *Repository) Get(ctx context.Context, id uuid.UUID) (Event, error) {
 	query := `
 		SELECT * FROM events WHERE id = $1
@@ -75,6 +63,25 @@ func (r *Repository) Get(ctx context.Context, id uuid.UUID) (Event, error) {
 	return event, nil
 }
 
+func (r *Repository) GetList(ctx context.Context, from time.Time, to time.Time) ([]Event, error) {
+	query := `
+		SELECT * FROM events WHERE start_time BETWEEN $1 AND $2
+	`
+
+	rows, err := r.db.QueryContext(ctx, query, from, to)
+	if err != nil {
+		return nil, fmt.Errorf("exec query: %w", err)
+	}
+
+	var events []Event
+	err = dbscan.ScanAll(&events, rows)
+	if err != nil {
+		return nil, fmt.Errorf("scan rows: %w", err)
+	}
+
+	return events, nil
+}
+
 func (r *Repository) Update(ctx context.Context, id uuid.UUID, eventUpdateDTO EventUpdateDTO) error {
 	qb := squirrel.Update("events").Where(squirrel.Eq{"id": id})
 	qb = qb.SetMap(changesBuilder(eventUpdateDTO).ToMap())
@@ -91,27 +98,15 @@ func (r *Repository) Update(ctx context.Context, id uuid.UUID, eventUpdateDTO Ev
 	return nil
 }
 
-type changesBuilder EventUpdateDTO
+func (r *Repository) Delete(ctx context.Context, id string) error {
+	query := `
+		DELETE FROM events WHERE id = $1
+	`
 
-func (e changesBuilder) ToMap() map[string]any {
-	result := make(map[string]any)
-	if e.Title != nil {
-		result["title"] = *e.Title
+	_, err := r.db.ExecContext(ctx, query, id)
+	if err != nil {
+		return fmt.Errorf("event deletion error: %w", err)
 	}
-	if e.StartTime != nil {
-		result["start_time"] = *e.StartTime
-	}
-	if e.EndTime != nil {
-		result["end_time"] = *e.EndTime
-	}
-	if e.Description != nil {
-		result["description"] = *e.Description
-	}
-	if e.UserID != nil {
-		result["user_id"] = *e.UserID
-	}
-	if e.NotifyBefore != nil {
-		result["notify_before"] = *e.NotifyBefore
-	}
-	return result
+
+	return nil
 }

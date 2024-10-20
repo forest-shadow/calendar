@@ -74,6 +74,41 @@ func (h *handlers) getEvent(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+func (h *handlers) getEventsList(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var eventsDto events.EventsListDTO
+	err := json.NewDecoder(r.Body).Decode(&eventsDto)
+	if err != nil {
+		h.handleError(ctx, w, err)
+		return
+	}
+	err = r.Body.Close()
+	if err != nil {
+		h.handleError(ctx, w, err)
+		return
+	}
+
+	events, err := h.eventService.GetList(ctx, eventsDto.From, eventsDto.To)
+	if err != nil {
+		h.handleError(ctx, w, err)
+		return
+	}
+
+	eventsJSON, err := json.Marshal(events)
+	if err != nil {
+		h.handleError(ctx, w, err)
+		return
+	}
+	_, err = w.Write(eventsJSON)
+	if err != nil {
+		h.handleError(ctx, w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
 func (h *handlers) updateEvent(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 

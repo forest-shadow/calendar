@@ -26,3 +26,33 @@ type EventUpdateDTO struct {
 	UserID       *uuid.UUID `json:"user_id,omitempty"`
 	NotifyBefore *string    `json:"notify_before,omitempty"`
 }
+
+type changesBuilder EventUpdateDTO
+
+func (e changesBuilder) ToMap() map[string]any {
+	result := make(map[string]any)
+	if e.Title != nil {
+		result["title"] = *e.Title
+	}
+	if e.StartTime != nil {
+		result["start_time"] = *e.StartTime
+	}
+	if e.EndTime != nil {
+		result["end_time"] = *e.EndTime
+	}
+	if e.Description != nil {
+		result["description"] = *e.Description
+	}
+	if e.UserID != nil {
+		result["user_id"] = *e.UserID
+	}
+	if e.NotifyBefore != nil {
+		result["notify_before"] = *e.NotifyBefore
+	}
+	return result
+}
+
+type EventsListDTO struct {
+	From time.Time `query:"from"`
+	To   time.Time `query:"to"`
+}

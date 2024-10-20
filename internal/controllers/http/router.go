@@ -37,8 +37,9 @@ func (h *handlers) build(router chi.Router) {
 
 	router.Route("/api/v1", func(r chi.Router) {
 		r.Post("/events", h.createEvent)
-		r.Put("/events/{id}", h.updateEvent)
 		r.Get("/events/{id}", h.getEvent)
+		r.Get("/events", h.getEventsList)
+		r.Put("/events/{id}", h.updateEvent)
 		r.Delete("/events/{id}", h.deleteEvent)
 	})
 }
