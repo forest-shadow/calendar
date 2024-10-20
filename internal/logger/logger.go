@@ -19,7 +19,7 @@ var encoderConfig = zapcore.EncoderConfig{
 	StacktraceKey:  "stacktrace",
 	CallerKey:      "caller",
 	LineEnding:     zapcore.DefaultLineEnding,
-	EncodeLevel:    zapcore.LowercaseLevelEncoder,
+	EncodeLevel:    zapcore.CapitalColorLevelEncoder,
 	EncodeTime:     zapcore.ISO8601TimeEncoder,
 	EncodeDuration: zapcore.SecondsDurationEncoder,
 	EncodeCaller:   zapcore.ShortCallerEncoder,
@@ -28,7 +28,7 @@ var encoderConfig = zapcore.EncoderConfig{
 func NewLogger() (Logger, error) {
 	logger := zap.New(
 		zapcore.NewCore(
-			zapcore.NewJSONEncoder(encoderConfig),
+			zapcore.NewConsoleEncoder(encoderConfig),
 			zapcore.AddSync(os.Stdout),
 			zap.NewAtomicLevelAt(zapcore.InfoLevel),
 		),

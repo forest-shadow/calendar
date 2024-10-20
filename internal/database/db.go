@@ -30,7 +30,7 @@ func NewDB(cfg *config.DB, logger logger.Logger) (*DB, error) {
 		return nil, fmt.Errorf("check connection: %w", err)
 	}
 
-	logger.Info("db connection success")
+	logger.Info("DB connection: success")
 
 	return &DB{
 		Connection: db,
