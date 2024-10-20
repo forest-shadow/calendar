@@ -10,8 +10,9 @@ import (
 )
 
 type Config struct {
-	DB   DB   `mapstructure:"db"`
-	HTTP HTTP `mapstructure:"http"`
+	Env  string `mapstructure:"env"`
+	DB   DB     `mapstructure:"db"`
+	HTTP HTTP   `mapstructure:"http"`
 }
 
 type HTTP struct {

@@ -5,6 +5,8 @@ import (
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+
+	"github.com/forest-shadow/calendar/internal/config"
 )
 
 // Added an alias to the logger from the zap package
@@ -25,12 +27,20 @@ var encoderConfig = zapcore.EncoderConfig{
 	EncodeCaller:   zapcore.ShortCallerEncoder,
 }
 
-func NewLogger() (Logger, error) {
+func getLevel(cfg *config.Config) zapcore.Level {
+	if cfg.Env == "production" {
+		return zapcore.InfoLevel
+	}
+
+	return zapcore.DebugLevel
+}
+
+func NewLogger(cfg *config.Config) (Logger, error) {
 	logger := zap.New(
 		zapcore.NewCore(
 			zapcore.NewConsoleEncoder(encoderConfig),
 			zapcore.AddSync(os.Stdout),
-			zap.NewAtomicLevelAt(zapcore.InfoLevel),
+			zap.NewAtomicLevelAt(getLevel(cfg)),
 		),
 		zap.AddCaller(),
 	)

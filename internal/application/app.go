@@ -24,7 +24,7 @@ func newApp() (*App, error) {
 		return nil, fmt.Errorf("failed to get config: %w", err)
 	}
 
-	logger, err := logger.NewLogger()
+	logger, err := logger.NewLogger(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create logger: %w", err)
 	}
@@ -63,7 +63,7 @@ func (app *App) shutdown() {
 	if err := app.db.Close(); err != nil {
 		app.logger.Error("close db connection: ", err.Error())
 	}
-	app.logger.Info("db connection closed")
+	app.logger.Info("DB connection: closed")
 
 	if err := app.httpServer.Stop(); err != nil {
 		app.logger.Errorf("failed to stop http server: %w", err)
