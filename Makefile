@@ -22,7 +22,7 @@ run: install-tools
 		sleep 1; \
 	done
 	echo "PostgreSQL is ready"
-	$(TOOLS_BIN)/air --build.cmd "go build -o tmp/calendar cmd/main.go"
+	$(TOOLS_BIN)/air --build.cmd "go build -o tmp/calendar cmd/main.go" --build.bin "./tmp/calendar"
 
 .PHONY:
 run-docker:
