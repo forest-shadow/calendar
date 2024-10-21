@@ -16,7 +16,7 @@ export PATH := $(TOOLS_BIN):$(PATH)
 .PHONY:
 .SILENT: 
 run: install-tools
-	docker-compose up postgres -d
+	docker-compose up postgres apply-migration -d
 	echo "Waiting for PostgreSQL to be ready..."
 	until docker-compose exec -T postgres pg_isready -U postgres; do \
 		sleep 1; \
