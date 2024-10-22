@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/rickb777/date/period"
 	"github.com/go-chi/chi/v5"
+	p "github.com/rickb777/period"
 
 	"github.com/forest-shadow/calendar/internal/apperrs"
 )
@@ -36,7 +36,7 @@ func (h *handlers) handleError(ctx context.Context, w http.ResponseWriter, err e
 }
 
 func validateISO8601Duration(durationStr string) error {
-	_, err := period.Parse(durationStr)
+	_, err := p.Parse(durationStr)
 	if err != nil {
 		return fmt.Errorf("invalid ISO 8601 duration format: %w", err)
 	}

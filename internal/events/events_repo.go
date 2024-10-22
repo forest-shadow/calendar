@@ -12,11 +12,17 @@ import (
 	"github.com/forest-shadow/calendar/internal/database"
 )
 
+type EventRepository interface {
+	repository
+	GetRecentEvents(ctx context.Context, now time.Time) (*[]Event, error)
+	DeleteOldEvents(ctx context.Context, now time.Time) (bool, error)
+}
+
 type Repository struct {
 	db database.DBConnection
 }
 
-func NewEventsRepository(db database.DBConnection) *Repository {
+func NewEventsRepository(db database.DBConnection) EventRepository {
 	return &Repository{db: db}
 }
 
@@ -109,4 +115,51 @@ func (r *Repository) Delete(ctx context.Context, id string) error {
 	}
 
 	return nil
+}
+
+func (r *Repository) GetRecentEvents(ctx context.Context, now time.Time) (*[]Event, error) {
+	query := `
+	WITH updated_events AS (
+		UPDATE events
+		SET notified_at = $1
+		WHERE start_time - notify_before <= $1 AND notified_at IS NULL
+		RETURNING *
+	)
+	SELECT * FROM updated_events
+`
+
+	rows, err := r.db.QueryContext(ctx, query, now)
+	if err != nil {
+		return nil, fmt.Errorf("exec query: %w", err)
+	}
+	defer rows.Close()
+
+	var events []Event
+	err = dbscan.ScanAll(&events, rows)
+	if err != nil {
+		return nil, fmt.Errorf("scan rows: %w", err)
+	}
+
+	return &events, nil
+}
+
+func (r *Repository) DeleteOldEvents(ctx context.Context, now time.Time) (bool, error) {
+	// thresholdTime := now.AddDate(-1, 0, 0)
+	thresholdTime := now.Add(-30 * time.Second)
+
+	query := `
+		DELETE FROM events WHERE start_time < $1
+	`
+
+	result, err := r.db.ExecContext(ctx, query, thresholdTime)
+	if err != nil {
+		return false, fmt.Errorf("event deletion error: %w", err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return false, fmt.Errorf("get rows affected: %w", err)
+	}
+
+	return rowsAffected > 0, nil
 }

@@ -77,7 +77,7 @@ func (h *handlers) getEvent(w http.ResponseWriter, r *http.Request) {
 func (h *handlers) getEventsList(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	var eventsDto events.EventsListDTO
+	var eventsDto events.ListFilterDTO
 	err := json.NewDecoder(r.Body).Decode(&eventsDto)
 	if err != nil {
 		h.handleError(ctx, w, err)

@@ -11,13 +11,13 @@ import (
 )
 
 type handlers struct {
-	eventService *events.EventService
+	eventService events.EventService
 	logger       logger.Logger
 }
 
 func NewRouter(
 	logger logger.Logger,
-	eventService *events.EventService,
+	eventService events.EventService,
 ) *chi.Mux {
 	router := chi.NewMux()
 

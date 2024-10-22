@@ -18,7 +18,7 @@ type App struct {
 	db         *database.DB
 }
 
-func newApp() (*App, error) {
+func newApp(ctx context.Context) (*App, error) {
 	cfg, err := config.GetConfig()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get config: %w", err)
@@ -34,7 +34,17 @@ func newApp() (*App, error) {
 		return nil, fmt.Errorf("failed to create db: %w", err)
 	}
 
-	eventsDomain := buildEventsDomain(db.Connection)
+	eventsDomain := buildEventsDomain(db.Connection, logger)
+	errChan := eventsDomain.eventsService.StartEventJobs(ctx)
+	go func() {
+		defer close(errChan)
+		for err := range errChan {
+			if err != nil {
+				logger.Errorf("error during event jobs: %w", err)
+				return
+			}
+		}
+	}()
 
 	router := router.NewRouter(logger, eventsDomain.eventsService)
 	httpServer, err := http.NewServer(&cfg.HTTP, logger, router)
@@ -72,7 +82,7 @@ func (app *App) shutdown() {
 }
 
 func Run(ctx context.Context) error {
-	app, err := newApp()
+	app, err := newApp(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to create app: %w", err)
 	}
