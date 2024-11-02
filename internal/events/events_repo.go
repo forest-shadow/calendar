@@ -11,18 +11,11 @@ import (
 
 	"github.com/forest-shadow/calendar/internal/database"
 )
-
-type EventRepository interface {
-	repository
-	GetRecentEvents(ctx context.Context, now time.Time) (*[]Event, error)
-	DeleteOldEvents(ctx context.Context, now time.Time) (bool, error)
-}
-
 type Repository struct {
 	db database.DBConnection
 }
 
-func NewEventsRepository(db database.DBConnection) EventRepository {
+func NewEventsRepository(db database.DBConnection) *Repository {
 	return &Repository{db: db}
 }
 

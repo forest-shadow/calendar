@@ -11,44 +11,46 @@ import (
 	"github.com/forest-shadow/calendar/internal/logger"
 )
 
-type EventService interface {
-	repository
-
-	StartEventJobs(ctx context.Context) chan error
-	StartSchedulerJob(ctx context.Context, errCh chan error)
-	StartNotifierJob(ctx context.Context, errCh chan error)
+type eventRepository interface {
+	Create(ctx context.Context, event Event) error
+	Get(ctx context.Context, id uuid.UUID) (Event, error)
+	GetList(ctx context.Context, from time.Time, to time.Time) ([]Event, error)
+	Update(ctx context.Context, id uuid.UUID, event EventUpdateDTO) error
+	Delete(ctx context.Context, id string) error
+	GetRecentEvents(ctx context.Context, now time.Time) (*[]Event, error)
+	DeleteOldEvents(ctx context.Context, now time.Time) (bool, error)
 }
 
-type EventManger struct {
-	repo   EventRepository
+type Service struct {
+	repo   eventRepository
 	logger logger.Logger
 }
 
-func NewEventService(repo EventRepository, logger logger.Logger) EventService {
-	return &EventManger{repo: repo, logger: logger}
+func NewEventsService(repo eventRepository, logger logger.Logger) *Service {
+	return &Service{repo: repo, logger: logger}
 }
 
-func (s *EventManger) Create(ctx context.Context, event Event) error {
+func (s *Service) Create(ctx context.Context, event Event) error {
 	return s.repo.Create(ctx, event)
 }
 
-func (s *EventManger) Get(ctx context.Context, id uuid.UUID) (Event, error) {
+func (s *Service) Get(ctx context.Context, id uuid.UUID) (Event, error) {
 	return s.repo.Get(ctx, id)
 }
 
-func (s *EventManger) GetList(ctx context.Context, from time.Time, to time.Time) ([]Event, error) {
+func (s *Service) GetList(ctx context.Context, from time.Time, to time.Time) ([]Event, error) {
 	return s.repo.GetList(ctx, from, to)
 }
 
-func (s *EventManger) Update(ctx context.Context, id uuid.UUID, event EventUpdateDTO) error {
+func (s *Service) Update(ctx context.Context, id uuid.UUID, event EventUpdateDTO) error {
 	return s.repo.Update(ctx, id, event)
 }
 
-func (s *EventManger) Delete(ctx context.Context, id string) error {
+func (s *Service) Delete(ctx context.Context, id string) error {
 	return s.repo.Delete(ctx, id)
 }
 
-func (s *EventManger) StartEventJobs(ctx context.Context) chan error {
+func (s *Service) StartEventJobs(ctx context.Context) chan error {
 	errCh := make(chan error, 2)
 
 	s.StartSchedulerJob(ctx, errCh)
@@ -57,7 +59,7 @@ func (s *EventManger) StartEventJobs(ctx context.Context) chan error {
 	return errCh
 }
 
-func (s *EventManger) StartSchedulerJob(ctx context.Context, errCh chan error) {
+func (s *Service) StartSchedulerJob(ctx context.Context, errCh chan error) {
 	jobName := "Scheduler Job"
 	s.logger.Info(fmt.Sprintf("%s: started", jobName))
 	tickerInterval := 30 * time.Second
@@ -87,7 +89,7 @@ func (s *EventManger) StartSchedulerJob(ctx context.Context, errCh chan error) {
 	}()
 }
 
-func (s *EventManger) StartNotifierJob(ctx context.Context, errCh chan error) {
+func (s *Service) StartNotifierJob(ctx context.Context, errCh chan error) {
 	jobName := "Notifier Job"
 
 	s.logger.Info(fmt.Sprintf("%s: started", jobName))

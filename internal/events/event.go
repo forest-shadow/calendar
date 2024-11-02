@@ -1,7 +1,6 @@
 package events
 
 import (
-	"context"
 	"time"
 
 	"github.com/google/uuid"
@@ -56,12 +55,4 @@ func (e changesBuilder) ToMap() map[string]any {
 type ListFilterDTO struct {
 	From time.Time `query:"from"`
 	To   time.Time `query:"to"`
-}
-
-type repository interface {
-	Create(ctx context.Context, event Event) error
-	Get(ctx context.Context, id uuid.UUID) (Event, error)
-	GetList(ctx context.Context, from time.Time, to time.Time) ([]Event, error)
-	Update(ctx context.Context, id uuid.UUID, event EventUpdateDTO) error
-	Delete(ctx context.Context, id string) error
 }
