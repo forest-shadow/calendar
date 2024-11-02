@@ -24,18 +24,18 @@ type App struct {
 func newApp(ctx context.Context) (*App, error) {
 	cfg, err := config.GetConfig()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get config: %w", err)
+		return nil, fmt.Errorf("get config: %w", err)
 	}
 
 	logger, err := logger.NewLogger(cfg)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create logger: %w", err)
+		return nil, fmt.Errorf("create logger: %w", err)
 	}
 	appLogger := logger.With("component", "app")
 
 	db, err := database.NewDB(&cfg.DB, appLogger)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create db: %w", err)
+		return nil, fmt.Errorf("create db: %w", err)
 	}
 
 	eventsDomain := buildEventsDomain(db.Connection, appLogger)
@@ -46,7 +46,7 @@ func newApp(ctx context.Context) (*App, error) {
 	router := router.NewRouter(appLogger, eventsDomain.eventsService)
 	httpServer, err := http.NewServer(&cfg.HTTP, appLogger, router)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create http server: %w", err)
+		return nil, fmt.Errorf("create http server: %w", err)
 	}
 
 	return &App{
@@ -71,7 +71,7 @@ func (app *App) startCronJobs() chan error {
 func (app *App) start() error {
 	httpConfig := app.cfg.HTTP
 	if err := app.httpServer.Start(&httpConfig); err != nil {
-		return fmt.Errorf("failed to start http server: %w", err)
+		return fmt.Errorf("start http server: %w", err)
 	}
 
 	errChan := app.startCronJobs()
@@ -80,7 +80,7 @@ func (app *App) start() error {
 		defer close(errChan)
 		for err := range errChan {
 			if err != nil {
-				app.logger.Errorf("error during event jobs: %w", err)
+				app.logger.Errorf("event jobs: %w", err)
 				return
 			}
 		}
@@ -96,7 +96,7 @@ func (app *App) shutdown() {
 	app.logger.Info("DB connection: closed")
 
 	if err := app.httpServer.Stop(); err != nil {
-		app.logger.Errorf("failed to stop http server: %w", err)
+		app.logger.Errorf("stop http server: %w", err)
 	}
 	app.logger.Info("Appication successfully shutted down")
 }
@@ -104,11 +104,11 @@ func (app *App) shutdown() {
 func Run(ctx context.Context) error {
 	app, err := newApp(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to create app: %w", err)
+		return fmt.Errorf("create app: %w", err)
 	}
 
 	if err := app.start(); err != nil {
-		return fmt.Errorf("error during start: %w", err)
+		return fmt.Errorf("start app: %w", err)
 	}
 
 	defer app.shutdown()
