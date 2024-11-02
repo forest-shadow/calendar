@@ -2,7 +2,7 @@
 set -e
 
 # Create pre-commit hook
-cat > .git/hooks/pre-commit << EOL
+cat > .git/hooks/pre-commit << 'EOL'
 #!/bin/bash
 set -e
 
