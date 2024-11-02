@@ -81,9 +81,9 @@ func (r *Repository) GetList(ctx context.Context, from time.Time, to time.Time) 
 	return events, nil
 }
 
-func (r *Repository) Update(ctx context.Context, id uuid.UUID, eventUpdateDTO EventUpdateDTO) error {
+func (r *Repository) Update(ctx context.Context, id uuid.UUID, event UpdateEvent) error {
 	qb := squirrel.Update("events").Where(squirrel.Eq{"id": id})
-	qb = qb.SetMap(changesBuilder(eventUpdateDTO).ToMap())
+	qb = qb.SetMap(map[string]any(event))
 	query, args, err := qb.PlaceholderFormat(squirrel.Dollar).ToSql()
 	if err != nil {
 		return fmt.Errorf("event update error: %w", err)

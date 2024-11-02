@@ -15,7 +15,7 @@ type eventRepository interface {
 	Create(ctx context.Context, event Event) error
 	Get(ctx context.Context, id uuid.UUID) (Event, error)
 	GetList(ctx context.Context, from time.Time, to time.Time) ([]Event, error)
-	Update(ctx context.Context, id uuid.UUID, event EventUpdateDTO) error
+	Update(ctx context.Context, id uuid.UUID, event UpdateEvent) error
 	Delete(ctx context.Context, id string) error
 	GetRecentEvents(ctx context.Context, now time.Time) (*[]Event, error)
 	DeleteOldEvents(ctx context.Context, now time.Time) (bool, error)
@@ -42,7 +42,7 @@ func (s *Service) GetList(ctx context.Context, from time.Time, to time.Time) ([]
 	return s.repo.GetList(ctx, from, to)
 }
 
-func (s *Service) Update(ctx context.Context, id uuid.UUID, event EventUpdateDTO) error {
+func (s *Service) Update(ctx context.Context, id uuid.UUID, event UpdateEvent) error {
 	return s.repo.Update(ctx, id, event)
 }
 

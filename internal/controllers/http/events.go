@@ -4,13 +4,50 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-
+	"time"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 
 	"github.com/forest-shadow/calendar/internal/apperrs"
 	"github.com/forest-shadow/calendar/internal/events"
 )
+
+type eventUpdateDTO struct {
+	Title        *string    `json:"title,omitempty"`
+	StartTime    *time.Time `json:"start_time,omitempty"`
+	EndTime      *time.Time `json:"end_time,omitempty"`
+	Description  *string    `json:"description,omitempty"`
+	UserID       *uuid.UUID `json:"user_id,omitempty"`
+	NotifyBefore *string    `json:"notify_before,omitempty"`
+}
+
+func (e *eventUpdateDTO) toDomain() events.UpdateEvent {
+	result := make(events.UpdateEvent)
+	if e.Title != nil {
+		result["title"] = *e.Title
+	}
+	if e.StartTime != nil {
+		result["start_time"] = *e.StartTime
+	}
+	if e.EndTime != nil {
+		result["end_time"] = *e.EndTime
+	}
+	if e.Description != nil {
+		result["description"] = *e.Description
+	}
+	if e.UserID != nil {
+		result["user_id"] = *e.UserID
+	}
+	if e.NotifyBefore != nil {
+		result["notify_before"] = *e.NotifyBefore
+	}
+	return result
+}
+
+type eventListFilterDTO struct {
+	From time.Time `query:"from"`
+	To   time.Time `query:"to"`
+}
 
 func (h *handlers) createEvent(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -77,7 +114,7 @@ func (h *handlers) getEvent(w http.ResponseWriter, r *http.Request) {
 func (h *handlers) getEventsList(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	var eventsDto events.ListFilterDTO
+	var eventsDto eventListFilterDTO
 	err := json.NewDecoder(r.Body).Decode(&eventsDto)
 	if err != nil {
 		h.handleError(ctx, w, err)
@@ -119,7 +156,7 @@ func (h *handlers) updateEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var event events.EventUpdateDTO
+	var event eventUpdateDTO
 	err = json.NewDecoder(r.Body).Decode(&event)
 	if err != nil {
 		h.handleError(ctx, w, err)
@@ -137,7 +174,7 @@ func (h *handlers) updateEvent(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	err = h.eventService.Update(ctx, id, event)
+	err = h.eventService.Update(ctx, id, event.toDomain())
 	if err != nil {
 		h.handleError(ctx, w, err)
 		return

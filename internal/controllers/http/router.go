@@ -17,7 +17,7 @@ type eventService interface {
 	Create(ctx context.Context, event events.Event) error
 	Get(ctx context.Context, id uuid.UUID) (events.Event, error)
 	GetList(ctx context.Context, from time.Time, to time.Time) ([]events.Event, error)
-	Update(ctx context.Context, id uuid.UUID, event events.EventUpdateDTO) error
+	Update(ctx context.Context, id uuid.UUID, event events.UpdateEvent) error
 	Delete(ctx context.Context, id string) error
 }
 

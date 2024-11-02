@@ -18,41 +18,4 @@ type Event struct {
 	NotifiedAt   *time.Time `json:"notified_at,omitempty"`
 }
 
-type EventUpdateDTO struct {
-	Title        *string    `json:"title,omitempty"`
-	StartTime    *time.Time `json:"start_time,omitempty"`
-	EndTime      *time.Time `json:"end_time,omitempty"`
-	Description  *string    `json:"description,omitempty"`
-	UserID       *uuid.UUID `json:"user_id,omitempty"`
-	NotifyBefore *string    `json:"notify_before,omitempty"`
-}
-
-type changesBuilder EventUpdateDTO
-
-func (e changesBuilder) ToMap() map[string]any {
-	result := make(map[string]any)
-	if e.Title != nil {
-		result["title"] = *e.Title
-	}
-	if e.StartTime != nil {
-		result["start_time"] = *e.StartTime
-	}
-	if e.EndTime != nil {
-		result["end_time"] = *e.EndTime
-	}
-	if e.Description != nil {
-		result["description"] = *e.Description
-	}
-	if e.UserID != nil {
-		result["user_id"] = *e.UserID
-	}
-	if e.NotifyBefore != nil {
-		result["notify_before"] = *e.NotifyBefore
-	}
-	return result
-}
-
-type ListFilterDTO struct {
-	From time.Time `query:"from"`
-	To   time.Time `query:"to"`
-}
+type UpdateEvent = map[string]any
