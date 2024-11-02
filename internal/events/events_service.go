@@ -60,8 +60,9 @@ func (s *Service) StartEventJobs(ctx context.Context) chan error {
 }
 
 func (s *Service) StartSchedulerJob(ctx context.Context, errCh chan error) {
-	jobName := "Scheduler Job"
-	s.logger.Info(fmt.Sprintf("%s: started", jobName))
+	jobName := "scheduler_job"
+	logger := s.logger.With("component", jobName)
+	logger.Info(fmt.Sprintf("%s: started", jobName))
 	tickerInterval := 30 * time.Second
 	// tickerInterval := 24 * time.Hour
 
@@ -72,10 +73,10 @@ func (s *Service) StartSchedulerJob(ctx context.Context, errCh chan error) {
 		for {
 			select {
 			case <-timer.C:
-				s.logger.Info(fmt.Sprintf("%s: job ticked", jobName))
+				logger.Info(fmt.Sprintf("%s: job ticked", jobName))
 				rowsAffected, err := s.repo.DeleteOldEvents(ctx, time.Now())
 				if rowsAffected {
-					s.logger.Info(fmt.Sprintf("%s: old events deleted", jobName))
+					logger.Info(fmt.Sprintf("%s: old events deleted", jobName))
 				}
 				if err != nil {
 					errCh <- fmt.Errorf("error deleting old events: %w", err)
@@ -90,9 +91,10 @@ func (s *Service) StartSchedulerJob(ctx context.Context, errCh chan error) {
 }
 
 func (s *Service) StartNotifierJob(ctx context.Context, errCh chan error) {
-	jobName := "Notifier Job"
+	jobName := "notifier_job"
+	logger := s.logger.With("component", jobName)
 
-	s.logger.Info(fmt.Sprintf("%s: started", jobName))
+	logger.Info(fmt.Sprintf("%s: started", jobName))
 	notifierLogPath := "tmp/events.log"
 	tickerInterval := 5 * time.Second
 
@@ -103,7 +105,7 @@ func (s *Service) StartNotifierJob(ctx context.Context, errCh chan error) {
 		for {
 			select {
 			case <-ticker.C:
-				s.logger.Info(fmt.Sprintf("%s: job ticked", jobName))
+				logger.Info(fmt.Sprintf("%s: job ticked", jobName))
 				events, err := s.repo.GetRecentEvents(ctx, time.Now())
 				if err != nil {
 					errCh <- fmt.Errorf("error getting events for notification: %w", err)
@@ -111,7 +113,7 @@ func (s *Service) StartNotifierJob(ctx context.Context, errCh chan error) {
 				}
 
 				for _, event := range *events {
-					s.logger.Infof("%s: Event \"%s\" for user {%s} will be in %s", jobName, event.Title, event.UserID, *event.NotifyBefore)
+					logger.Infof("%s: Event \"%s\" for user {%s} will be in %s", jobName, event.Title, event.UserID, *event.NotifyBefore)
 
 					// write to file
 					_, err := os.Stat(notifierLogPath)

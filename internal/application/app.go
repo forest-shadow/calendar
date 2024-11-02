@@ -28,13 +28,14 @@ func newApp(ctx context.Context) (*App, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to create logger: %w", err)
 	}
+	appLogger := logger.With("component", "app")
 
-	db, err := database.NewDB(&cfg.DB, logger)
+	db, err := database.NewDB(&cfg.DB, appLogger)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create db: %w", err)
 	}
 
-	eventsDomain := buildEventsDomain(db.Connection, logger)
+	eventsDomain := buildEventsDomain(db.Connection, appLogger)
 	errChan := eventsDomain.eventsService.StartEventJobs(ctx)
 	go func() {
 		defer close(errChan)
@@ -46,8 +47,8 @@ func newApp(ctx context.Context) (*App, error) {
 		}
 	}()
 
-	router := router.NewRouter(logger, eventsDomain.eventsService)
-	httpServer, err := http.NewServer(&cfg.HTTP, logger, router)
+	router := router.NewRouter(appLogger, eventsDomain.eventsService)
+	httpServer, err := http.NewServer(&cfg.HTTP, appLogger, router)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create http server: %w", err)
 	}
@@ -55,7 +56,7 @@ func newApp(ctx context.Context) (*App, error) {
 	return &App{
 		cfg:        cfg,
 		httpServer: httpServer,
-		logger:     logger,
+		logger:     appLogger,
 		db:         db,
 	}, nil
 }
