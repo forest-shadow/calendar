@@ -17,7 +17,8 @@ type eventService interface {
 	GetList(ctx context.Context, from time.Time, to time.Time) ([]events.Event, error)
 	Update(ctx context.Context, id uuid.UUID, event events.UpdateEvent) error
 	Delete(ctx context.Context, id string) error
-	StartEventJobs(ctx context.Context) chan error
+	GetRecentEvents(ctx context.Context, from time.Time) (*[]events.Event, error)
+	DeleteOldEvents(ctx context.Context, date time.Time) (bool, error)
 }
 
 type EventsDomain struct {

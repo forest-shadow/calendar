@@ -11,6 +11,7 @@ import (
 
 	"github.com/forest-shadow/calendar/internal/database"
 )
+
 type Repository struct {
 	db database.DBConnection
 }

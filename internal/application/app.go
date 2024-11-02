@@ -7,15 +7,18 @@ import (
 	"github.com/forest-shadow/calendar/internal/config"
 	router "github.com/forest-shadow/calendar/internal/controllers/http"
 	"github.com/forest-shadow/calendar/internal/database"
-	"github.com/forest-shadow/calendar/internal/logger"
-	"github.com/forest-shadow/calendar/internal/transport/http"
+	"github.com/forest-shadow/calendar/internal/jobs"
+	logger "github.com/forest-shadow/calendar/internal/logger"
+	http "github.com/forest-shadow/calendar/internal/transport/http"
 )
 
 type App struct {
-	cfg        *config.Config
-	httpServer *http.Server
-	logger     logger.Logger
-	db         *database.DB
+	cfg              *config.Config
+	httpServer       *http.Server
+	logger           logger.Logger
+	db               *database.DB
+	eventNotifierJob *jobs.EventNotifierJob
+	eventCleanerJob  *jobs.EventCleanerJob
 }
 
 func newApp(ctx context.Context) (*App, error) {
@@ -36,16 +39,9 @@ func newApp(ctx context.Context) (*App, error) {
 	}
 
 	eventsDomain := buildEventsDomain(db.Connection, appLogger)
-	errChan := eventsDomain.eventsService.StartEventJobs(ctx)
-	go func() {
-		defer close(errChan)
-		for err := range errChan {
-			if err != nil {
-				logger.Errorf("error during event jobs: %w", err)
-				return
-			}
-		}
-	}()
+
+	eventNotifierJob := jobs.NewEventNotifier(ctx, cfg, eventsDomain.eventsService, logger)
+	eventCleanerJob := jobs.NewEventCleanerJob(ctx, cfg, eventsDomain.eventsService, logger)
 
 	router := router.NewRouter(appLogger, eventsDomain.eventsService)
 	httpServer, err := http.NewServer(&cfg.HTTP, appLogger, router)
@@ -54,11 +50,22 @@ func newApp(ctx context.Context) (*App, error) {
 	}
 
 	return &App{
-		cfg:        cfg,
-		httpServer: httpServer,
-		logger:     appLogger,
-		db:         db,
+		cfg:              cfg,
+		httpServer:       httpServer,
+		logger:           appLogger,
+		db:               db,
+		eventNotifierJob: eventNotifierJob,
+		eventCleanerJob:  eventCleanerJob,
 	}, nil
+}
+
+func (app *App) startCronJobs() chan error {
+	errCh := make(chan error, 2)
+
+	app.eventNotifierJob.Start(errCh)
+	app.eventCleanerJob.Start(errCh)
+
+	return errCh
 }
 
 func (app *App) start() error {
@@ -66,6 +73,18 @@ func (app *App) start() error {
 	if err := app.httpServer.Start(&httpConfig); err != nil {
 		return fmt.Errorf("failed to start http server: %w", err)
 	}
+
+	errChan := app.startCronJobs()
+
+	go func() {
+		defer close(errChan)
+		for err := range errChan {
+			if err != nil {
+				app.logger.Errorf("error during event jobs: %w", err)
+				return
+			}
+		}
+	}()
 	app.logger.Infof("Appication started at port: %v", httpConfig.Port)
 	return nil
 }

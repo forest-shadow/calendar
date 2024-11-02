@@ -10,9 +10,11 @@ import (
 )
 
 type Config struct {
-	Env  string `mapstructure:"env"`
-	DB   DB     `mapstructure:"db"`
-	HTTP HTTP   `mapstructure:"http"`
+	Env      string   `mapstructure:"env"`
+	DB       DB       `mapstructure:"db"`
+	HTTP     HTTP     `mapstructure:"http"`
+	Notifier Notifier `mapstructure:"notifier"`
+	Cleaner  Cleaner  `mapstructure:"cleaner"`
 }
 
 type HTTP struct {
@@ -21,6 +23,15 @@ type HTTP struct {
 
 type DB struct {
 	URI string `mapstructure:"uri"`
+}
+
+type Notifier struct {
+	LogPath  string `mapstructure:"log_path"`
+	Interval string `mapstructure:"interval"`
+}
+
+type Cleaner struct {
+	Interval string `mapstructure:"interval"`
 }
 
 func GetConfig() (*Config, error) {
