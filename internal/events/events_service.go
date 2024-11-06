@@ -17,6 +17,7 @@ type eventRepository interface {
 	Delete(ctx context.Context, id string) error
 	GetRecentEvents(ctx context.Context, now time.Time) (*[]Event, error)
 	DeleteOldEvents(ctx context.Context, now time.Time) (bool, error)
+	MarkEventsAsNotified(ctx context.Context, ids []uuid.UUID, notifiedAt time.Time) error
 }
 
 type Service struct {
@@ -55,6 +56,10 @@ func (s *Service) GetRecentEvents(ctx context.Context, from time.Time) (*[]Event
 	}
 
 	return events, nil
+}
+
+func (s *Service) MarkEventsAsNotified(ctx context.Context, ids []uuid.UUID, notifiedAt time.Time) error {
+	return s.repo.MarkEventsAsNotified(ctx, ids, notifiedAt)
 }
 
 func (s *Service) DeleteOldEvents(ctx context.Context, date time.Time) (bool, error) {

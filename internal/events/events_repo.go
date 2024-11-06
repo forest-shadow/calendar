@@ -113,14 +113,11 @@ func (r *Repository) Delete(ctx context.Context, id string) error {
 
 func (r *Repository) GetRecentEvents(ctx context.Context, now time.Time) (*[]Event, error) {
 	query := `
-	WITH updated_events AS (
-		UPDATE events
-		SET notified_at = $1
-		WHERE start_time - notify_before <= $1 AND notified_at IS NULL
-		RETURNING *
-	)
-	SELECT * FROM updated_events
-`
+	SELECT * 
+	FROM events
+	WHERE start_time - notify_before <= $1 
+		AND notified_at IS NULL
+	`
 
 	rows, err := r.db.QueryContext(ctx, query, now)
 	if err != nil {
@@ -135,6 +132,19 @@ func (r *Repository) GetRecentEvents(ctx context.Context, now time.Time) (*[]Eve
 	}
 
 	return &events, nil
+}
+
+func (r *Repository) MarkEventsAsNotified(ctx context.Context, ids []uuid.UUID, notifiedAt time.Time) error {
+	query := `
+		UPDATE events SET notified_at = $1 WHERE id IN ($2)
+	`
+
+	_, err := r.db.ExecContext(ctx, query, notifiedAt, ids)
+	if err != nil {
+		return fmt.Errorf("exec query: %w", err)
+	}
+
+	return nil
 }
 
 func (r *Repository) DeleteOldEvents(ctx context.Context, now time.Time) (bool, error) {

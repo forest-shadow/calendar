@@ -19,6 +19,7 @@ type eventService interface {
 	Delete(ctx context.Context, id string) error
 	GetRecentEvents(ctx context.Context, from time.Time) (*[]events.Event, error)
 	DeleteOldEvents(ctx context.Context, date time.Time) (bool, error)
+	MarkEventsAsNotified(ctx context.Context, ids []uuid.UUID, notifiedAt time.Time) error
 }
 
 type EventsDomain struct {

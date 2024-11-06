@@ -6,6 +6,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/google/uuid"
+
 	"github.com/forest-shadow/calendar/internal/config"
 	"github.com/forest-shadow/calendar/internal/events"
 	"github.com/forest-shadow/calendar/internal/logger"
@@ -14,6 +16,7 @@ import (
 type eventService interface {
 	GetRecentEvents(ctx context.Context, from time.Time) (*[]events.Event, error)
 	DeleteOldEvents(ctx context.Context, date time.Time) (bool, error)
+	MarkEventsAsNotified(ctx context.Context, ids []uuid.UUID, notifiedAt time.Time) error
 }
 
 type EventNotifierJob struct {
@@ -82,6 +85,12 @@ func (j *EventNotifierJob) Start(errCh chan error) {
 					_, err = f.WriteString(fmt.Sprintf("TS: %s. Event \"%s\" for user {%s} will be in %s\n", time.Now().UTC().Format(time.RFC3339), event.Title, event.UserID, *event.NotifyBefore))
 					if err != nil {
 						errCh <- fmt.Errorf("Error writing to file: %v", err)
+						return
+					}
+
+					err = j.eventsService.MarkEventsAsNotified(j.ctx, []uuid.UUID{event.ID}, time.Now())
+					if err != nil {
+						errCh <- fmt.Errorf("marking event as notified: %w", err)
 						return
 					}
 				}
