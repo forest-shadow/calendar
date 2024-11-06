@@ -40,7 +40,10 @@ func newApp(ctx context.Context) (*App, error) {
 
 	eventsDomain := buildEventsDomain(db.Connection, appLogger)
 
-	eventNotifierJob := jobs.NewEventNotifier(ctx, cfg, eventsDomain.eventsService, logger)
+	eventNotifierJob, err := jobs.NewEventNotifier(ctx, cfg, eventsDomain.eventsService)
+	if err != nil {
+		return nil, fmt.Errorf("create event notifier: %w", err)
+	}
 	eventCleanerJob := jobs.NewEventCleanerJob(ctx, cfg, eventsDomain.eventsService, logger)
 
 	router := router.NewRouter(appLogger, eventsDomain.eventsService)

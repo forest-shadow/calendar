@@ -135,11 +135,16 @@ func (r *Repository) GetRecentEvents(ctx context.Context, now time.Time) (*[]Eve
 }
 
 func (r *Repository) MarkEventsAsNotified(ctx context.Context, ids []uuid.UUID, notifiedAt time.Time) error {
-	query := `
-		UPDATE events SET notified_at = $1 WHERE id IN ($2)
-	`
+	query, args, err := squirrel.Update("events").
+		Set("notified_at", notifiedAt).
+		Where(squirrel.Eq{"id": ids}).
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+	if err != nil {
+		return fmt.Errorf("building query: %w", err)
+	}
 
-	_, err := r.db.ExecContext(ctx, query, notifiedAt, ids)
+	_, err = r.db.ExecContext(ctx, query, args...)
 	if err != nil {
 		return fmt.Errorf("exec query: %w", err)
 	}

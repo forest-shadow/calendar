@@ -12,6 +12,7 @@ require (
 	github.com/rickb777/period v1.0.6
 	github.com/spf13/viper v1.18.0
 	go.uber.org/zap v1.27.0
+	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )
 
 require (

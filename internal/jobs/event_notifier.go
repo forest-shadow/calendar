@@ -3,7 +3,6 @@ package jobs
 import (
 	"context"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/google/uuid"
@@ -26,18 +25,21 @@ type EventNotifierJob struct {
 	logger        logger.Logger
 }
 
-func NewEventNotifier(ctx context.Context, cfg *config.Config, eventsService eventService, logger logger.Logger) *EventNotifierJob {
+func NewEventNotifier(ctx context.Context, cfg *config.Config, eventsService eventService) (*EventNotifierJob, error) {
+	logger, err := logger.NewNotifierLogger(cfg)
+	if err != nil {
+		return nil, fmt.Errorf("create logger: %w", err)
+	}
 	return &EventNotifierJob{
 		cfg:           cfg,
 		ctx:           ctx,
 		eventsService: eventsService,
-		logger:        logger.With("component", "notifier_job"),
-	}
+		logger:        logger,
+	}, nil
 }
 
 func (j *EventNotifierJob) Start(errCh chan error) {
 	j.logger.Info("started")
-	notifierLogPath := j.cfg.Notifier.LogPath
 	tickerInterval, err := time.ParseDuration(j.cfg.Notifier.Interval)
 	if err != nil {
 		errCh <- fmt.Errorf("invalid interval: %w", err)
@@ -59,36 +61,22 @@ func (j *EventNotifierJob) Start(errCh chan error) {
 				}
 
 				for _, event := range *events {
-					j.logger.Infof("Event \"%s\" for user {%s} will be in %s", event.Title, event.UserID, *event.NotifyBefore)
 					j.logger.With(
 						"event_id", event.ID,
 						"event_title", event.Title,
 						"event_user_id", event.UserID,
 						"event_notify_before", *event.NotifyBefore,
+						"notification_msg", fmt.Sprintf("Event \"%s\" for user {%s} will be in %s", event.Title, event.UserID, *event.NotifyBefore),
 					).Info("notification")
+				}
 
-					// write to file
-					_, err := os.Stat(notifierLogPath)
-					if os.IsNotExist(err) {
-						_, err := os.Create(notifierLogPath)
-						if err != nil {
-							errCh <- fmt.Errorf("creating file: %v", err)
-							return
-						}
-					}
-					f, err := os.OpenFile(notifierLogPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, os.FileMode(0o644))
-					if err != nil {
-						errCh <- fmt.Errorf("opening file: %v", err)
-						return
-					}
-					defer f.Close()
-					_, err = f.WriteString(fmt.Sprintf("TS: %s. Event \"%s\" for user {%s} will be in %s\n", time.Now().UTC().Format(time.RFC3339), event.Title, event.UserID, *event.NotifyBefore))
-					if err != nil {
-						errCh <- fmt.Errorf("Error writing to file: %v", err)
-						return
+				if len(*events) > 0 {
+					ids := make([]uuid.UUID, len(*events))
+					for i, event := range *events {
+						ids[i] = event.ID
 					}
 
-					err = j.eventsService.MarkEventsAsNotified(j.ctx, []uuid.UUID{event.ID}, time.Now())
+					err = j.eventsService.MarkEventsAsNotified(j.ctx, ids, time.Now())
 					if err != nil {
 						errCh <- fmt.Errorf("marking event as notified: %w", err)
 						return
