@@ -50,12 +50,7 @@ func (s *Service) Delete(ctx context.Context, id string) error {
 }
 
 func (s *Service) GetRecentEvents(ctx context.Context, from time.Time) (*[]Event, error) {
-	events, err := s.repo.GetRecentEvents(ctx, from)
-	if err != nil {
-		return nil, err
-	}
-
-	return events, nil
+	return s.repo.GetRecentEvents(ctx, from)
 }
 
 func (s *Service) MarkEventsAsNotified(ctx context.Context, ids []uuid.UUID, notifiedAt time.Time) error {
