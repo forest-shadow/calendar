@@ -20,8 +20,6 @@ type Server struct {
 
 const ServerShutdownTimeout = 10 * time.Second
 
-// create a new HTTP server instance
-// TODO: add - handler http.Handler
 func NewServer(cfg *config.HTTP, logger logger.Logger, router http.Handler) (*Server, error) {
 	addr := fmt.Sprintf(":%d", cfg.Port)
 	listener, err := net.Listen("tcp", addr)

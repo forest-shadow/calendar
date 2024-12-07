@@ -11,8 +11,10 @@ import (
 	"github.com/forest-shadow/calendar/internal/logger"
 )
 
+type DBConnection = *sql.DB
+
 type DB struct {
-	connection *sql.DB
+	Connection DBConnection
 	logger     logger.Logger
 	Close      func() error
 }
@@ -28,10 +30,10 @@ func NewDB(cfg *config.DB, logger logger.Logger) (*DB, error) {
 		return nil, fmt.Errorf("check connection: %w", err)
 	}
 
-	logger.Info("db connection success")
+	logger.Info("DB connection: success")
 
 	return &DB{
-		connection: db,
+		Connection: db,
 		logger:     logger,
 		Close:      db.Close,
 	}, nil

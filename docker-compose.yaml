@@ -15,6 +15,19 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+  
+  apply-migration:
+    image: migrations
+    build:
+      context: .
+      dockerfile: scripts/migration.Dockerfile
+    environment:
+      GOOSE_DRIVER: postgres
+      GOOSE_DBSTRING: "host=postgres user=postgres password=password dbname=calendar sslmode=disable"
+    command: "/opt/bin/goose -dir /opt/go/app/db/migrations up"
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   calendar_app:
     build:
