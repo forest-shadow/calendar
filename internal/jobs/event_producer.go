@@ -26,7 +26,7 @@ func NewEventProducer(ctx context.Context, cfg *config.Config) (*EventProducer, 
 		kgo.DisableIdempotentWrite(),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("create kafka client: %w", err)
+		return nil, fmt.Errorf("create kafka event producer client: %w", err)
 	}
 
 	return &EventProducer{ctx: ctx, p: cl}, nil
@@ -46,4 +46,8 @@ func (p *EventProducer) SendEvent(ctx context.Context, event *events.Event) erro
 		return fmt.Errorf("produce event: %w", err)
 	}
 	return nil
+}
+
+func (p *EventProducer) Close() {
+	p.p.Close()
 }

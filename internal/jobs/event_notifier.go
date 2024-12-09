@@ -54,41 +54,51 @@ func (j *EventNotifierJob) Start(errCh chan error) {
 		return
 	}
 
+	eventConsumer, err := NewEventConsumer(j.ctx, j.cfg)
+	if err != nil {
+		errCh <- fmt.Errorf("create event consumer: %w", err)
+		return
+	}
+
+	go func() {
+		err = eventConsumer.Consume(func(event events.Event) {
+			j.logger.With(
+				"event_id", event.ID,
+				"event_title", event.Title,
+				"event_user_id", event.UserID,
+				"event_notify_before", *event.NotifyBefore,
+				"notification_msg", fmt.Sprintf("Event \"%s\" for user {%s} will be in %s", event.Title, event.UserID, *event.NotifyBefore),
+			).Info("notification")
+
+			err = j.eventsService.MarkEventsAsNotified(j.ctx, []uuid.UUID{event.ID}, time.Now())
+			if err != nil {
+				errCh <- fmt.Errorf("marking event as notified: %w", err)
+				return
+			}
+		})
+		if err != nil {
+			errCh <- fmt.Errorf("consuming events: %w", err)
+			return
+		}
+	}()
+
 	go func() {
 		defer ticker.Stop()
+		defer eventConsumer.Close()
+		defer eventProducer.Close()
 		for {
 			select {
 			case <-ticker.C:
 				j.logger.Info("tick")
-				events, err := j.eventsService.GetRecentEvents(j.ctx, time.Now())
+				recentEvents, err := j.eventsService.GetRecentEvents(j.ctx, time.Now())
 				if err != nil {
 					errCh <- fmt.Errorf("getting events for notification: %w", err)
 					return
 				}
 
-				for _, event := range *events {
+				for _, event := range *recentEvents {
 					if err := eventProducer.SendEvent(j.ctx, &event); err != nil {
 						errCh <- fmt.Errorf("sending event: %w", err)
-						return
-					}
-					j.logger.With(
-						"event_id", event.ID,
-						"event_title", event.Title,
-						"event_user_id", event.UserID,
-						"event_notify_before", *event.NotifyBefore,
-						"notification_msg", fmt.Sprintf("Event \"%s\" for user {%s} will be in %s", event.Title, event.UserID, *event.NotifyBefore),
-					).Info("notification")
-				}
-
-				if len(*events) > 0 {
-					ids := make([]uuid.UUID, len(*events))
-					for i, event := range *events {
-						ids[i] = event.ID
-					}
-
-					err = j.eventsService.MarkEventsAsNotified(j.ctx, ids, time.Now())
-					if err != nil {
-						errCh <- fmt.Errorf("marking event as notified: %w", err)
 						return
 					}
 				}
