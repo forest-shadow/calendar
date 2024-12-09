@@ -48,6 +48,12 @@ func (j *EventNotifierJob) Start(errCh chan error) {
 
 	ticker := time.NewTicker(tickerInterval)
 
+	eventProducer, err := NewEventProducer(j.ctx, j.cfg)
+	if err != nil {
+		errCh <- fmt.Errorf("create event producer: %w", err)
+		return
+	}
+
 	go func() {
 		defer ticker.Stop()
 		for {
@@ -61,6 +67,10 @@ func (j *EventNotifierJob) Start(errCh chan error) {
 				}
 
 				for _, event := range *events {
+					if err := eventProducer.SendEvent(j.ctx, &event); err != nil {
+						errCh <- fmt.Errorf("sending event: %w", err)
+						return
+					}
 					j.logger.With(
 						"event_id", event.ID,
 						"event_title", event.Title,

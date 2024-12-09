@@ -15,6 +15,7 @@ type Config struct {
 	HTTP     HTTP     `mapstructure:"http"`
 	Notifier Notifier `mapstructure:"notifier"`
 	Cleaner  Cleaner  `mapstructure:"cleaner"`
+	Kafka    Kafka    `mapstructure:"kafka"`
 }
 
 type HTTP struct {
@@ -32,6 +33,11 @@ type Notifier struct {
 
 type Cleaner struct {
 	Interval string `mapstructure:"interval"`
+}
+
+type Kafka struct {
+	BootstrapServers string `mapstructure:"bootstrap_servers"`
+	Topic            string `mapstructure:"topic"`
 }
 
 func GetConfig() (*Config, error) {
