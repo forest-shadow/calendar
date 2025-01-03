@@ -62,32 +62,16 @@ func newApp(ctx context.Context) (*App, error) {
 	}, nil
 }
 
-func (app *App) startCronJobs() chan error {
-	errCh := make(chan error, 2)
-
-	app.eventNotifierJob.Start(errCh)
-	app.eventCleanerJob.Start(errCh)
-
-	return errCh
-}
-
 func (app *App) start() error {
 	httpConfig := app.cfg.HTTP
 	if err := app.httpServer.Start(&httpConfig); err != nil {
 		return fmt.Errorf("start http server: %w", err)
 	}
 
-	errChan := app.startCronJobs()
+	if err := jobs.RunJobs([]jobs.Job{app.eventNotifierJob, app.eventCleanerJob}); err != nil {
+		return fmt.Errorf("cron jobs: %w", err)
+	}
 
-	go func() {
-		defer close(errChan)
-		for err := range errChan {
-			if err != nil {
-				app.logger.Errorf("event jobs: %w", err)
-				return
-			}
-		}
-	}()
 	app.logger.Infof("Appication started at port: %v", httpConfig.Port)
 	return nil
 }
