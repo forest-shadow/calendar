@@ -58,7 +58,7 @@ install-tools:
 		echo "TOOLS_BIN directory does not exist or is empty.\n Installing tools..."; \
 		go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.61.0; \
 		go install github.com/pressly/goose/v3/cmd/goose@v3.22.1; \
-		go install github.com/air-verse/air@1.61.1; \
+		go install github.com/air-verse/air@v1.61.1; \
 	fi
 
 .PHONY:
