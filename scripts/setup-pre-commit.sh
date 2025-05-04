@@ -6,6 +6,13 @@ cat > .git/hooks/pre-commit << 'EOL'
 #!/bin/bash
 set -e
 
+# Initialize asdf if it's installed
+if command -v asdf >/dev/null 2>&1; then
+  . "$HOME/.asdf/asdf.sh"
+else
+  echo "asdf not found; skipping asdf setup."
+fi
+
 echo "Running golangci-lint"
 golangci-lint run --fix
 

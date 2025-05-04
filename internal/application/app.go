@@ -102,5 +102,5 @@ func Run(ctx context.Context) error {
 
 	<-ctx.Done()
 
-	return nil
+	return ctx.Err()
 }
