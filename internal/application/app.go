@@ -46,7 +46,8 @@ func newApp(ctx context.Context) (*App, error) {
 	}
 	eventCleanerJob := jobs.NewEventCleanerJob(ctx, cfg, eventsDomain.eventsService, logger)
 
-	router := router.NewRouter(appLogger, eventsDomain.eventsService)
+	handlers := router.NewHandlers(appLogger, eventsDomain.eventsService)
+	router := router.NewRouter(handlers)
 	httpServer, err := http.NewServer(&cfg.HTTP, appLogger, router)
 	if err != nil {
 		return nil, fmt.Errorf("create http server: %w", err)

@@ -21,36 +21,35 @@ type eventService interface {
 	Delete(ctx context.Context, id string) error
 }
 
-type handlers struct {
+type Handlers struct {
 	eventService eventService
 	logger       logger.Logger
 }
 
-func NewRouter(
-	logger logger.Logger,
-	eventService eventService,
-) *chi.Mux {
-	router := chi.NewMux()
-
-	handlers := handlers{
+func NewHandlers(logger logger.Logger, eventService eventService) *Handlers {
+	return &Handlers{
 		eventService: eventService,
 		logger:       logger,
 	}
-	handlers.build(router)
+}
+
+func NewRouter(handlers *Handlers) *chi.Mux {
+	router := chi.NewMux()
+
+	// Configure middleware
+	router.Use(middleware.Recoverer)
+	router.Use(middleware.Logger)
+	
+	// Configure routes
+	router.Get("/healthcheck", handlers.healthcheck)
+	router.Route("/api/v1", func(r chi.Router) {
+		r.Post("/events", handlers.createEvent)
+		r.Get("/events/{id}", handlers.getEvent)
+		r.Get("/events", handlers.getEventsList)
+		r.Put("/events/{id}", handlers.updateEvent)
+		r.Delete("/events", handlers.deleteEvent)
+	})
 
 	return router
 }
 
-func (h *handlers) build(router chi.Router) {
-	router.Use(middleware.Recoverer)
-	router.Use(middleware.Logger)
-	router.Get("/healthcheck", h.healthcheck)
-
-	router.Route("/api/v1", func(r chi.Router) {
-		r.Post("/events", h.createEvent)
-		r.Get("/events/{id}", h.getEvent)
-		r.Get("/events", h.getEventsList)
-		r.Put("/events/{id}", h.updateEvent)
-		r.Delete("/events/{id}", h.deleteEvent)
-	})
-}

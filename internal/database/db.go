@@ -15,7 +15,6 @@ type DBConnection = *sql.DB
 
 type DB struct {
 	Connection DBConnection
-	logger     logger.Logger
 	Close      func() error
 }
 
@@ -34,7 +33,6 @@ func NewDB(cfg *config.DB, logger logger.Logger) (*DB, error) {
 
 	return &DB{
 		Connection: db,
-		logger:     logger,
 		Close:      db.Close,
 	}, nil
 }
