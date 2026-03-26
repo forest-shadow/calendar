@@ -15,7 +15,7 @@ func TestTestDB(t *testing.T) {
 		defer testDB.Close(t)
 
 		// Basic connectivity test
-		err := testDB.DB.Connection.PingContext(context.Background())
+		err := testDB.DB.PingContext(context.Background())
 		require.NoError(t, err, "Database should be reachable")
 	})
 
@@ -28,7 +28,7 @@ func TestTestDB(t *testing.T) {
 
 		// Verify events table exists and has correct structure
 		var tableName string
-		err := testDB.DB.Connection.QueryRowContext(
+		err := testDB.DB.QueryRowContext(
 			context.Background(),
 			`SELECT table_name 
 			 FROM information_schema.tables 
@@ -38,7 +38,7 @@ func TestTestDB(t *testing.T) {
 		assert.Equal(t, "events", tableName)
 
 		// Verify columns
-		rows, err := testDB.DB.Connection.QueryContext(
+		rows, err := testDB.DB.QueryContext(
 			context.Background(),
 			`SELECT column_name, data_type 
 			 FROM information_schema.columns 
@@ -76,7 +76,7 @@ func TestTestDB(t *testing.T) {
 
 		// Verify test data
 		var count int
-		err = testDB.DB.Connection.QueryRowContext(context.Background(), `
+		err = testDB.DB.QueryRowContext(context.Background(), `
 			SELECT COUNT(*) FROM events
 		`).Scan(&count)
 		require.NoError(t, err)

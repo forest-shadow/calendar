@@ -2,6 +2,7 @@ package testutil
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"testing"
 
@@ -16,7 +17,7 @@ import (
 )
 
 type DB struct {
-	DB        *database.DB
+	DB        *sql.DB
 	Container testcontainers.Container
 	dbURI     string
 }

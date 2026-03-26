@@ -1,7 +1,8 @@
-package application
+package app
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 
 	"github.com/forest-shadow/calendar/internal/config"
@@ -16,7 +17,7 @@ type App struct {
 	cfg              *config.Config
 	httpServer       *http.Server
 	logger           logger.Logger
-	db               *database.DB
+	db               *sql.DB
 	eventNotifierJob *jobs.EventNotifierJob
 	eventCleanerJob  *jobs.EventCleanerJob
 }
@@ -38,7 +39,7 @@ func newApp(ctx context.Context) (*App, error) {
 		return nil, fmt.Errorf("create db: %w", err)
 	}
 
-	eventsDomain := buildEventsDomain(db.Connection, appLogger)
+	eventsDomain := buildEventsDomain(db, appLogger)
 
 	eventNotifierJob, err := jobs.NewEventNotifier(ctx, cfg, eventsDomain.eventsService)
 	if err != nil {

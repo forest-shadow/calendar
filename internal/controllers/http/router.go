@@ -39,7 +39,7 @@ func NewRouter(handlers *Handlers) *chi.Mux {
 	// Configure middleware
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.Logger)
-	
+
 	// Configure routes
 	router.Get("/healthcheck", handlers.healthcheck)
 	router.Route("/api/v1", func(r chi.Router) {
@@ -52,4 +52,3 @@ func NewRouter(handlers *Handlers) *chi.Mux {
 
 	return router
 }
-

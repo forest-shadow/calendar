@@ -23,7 +23,7 @@ type RepositoryTestSuite struct {
 func (s *RepositoryTestSuite) SetupSuite() {
 	s.testDB = testutil.NewTestDB(s.T())
 	s.testDB.RunMigrations(s.T(), "../../migrations")
-	s.repo = events.NewEventsRepository(s.testDB.DB.Connection)
+	s.repo = events.NewEventsRepository(s.testDB.DB)
 	s.ctx = context.Background()
 }
 

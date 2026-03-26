@@ -11,14 +11,7 @@ import (
 	"github.com/forest-shadow/calendar/internal/logger"
 )
 
-type DBConnection = *sql.DB
-
-type DB struct {
-	Connection DBConnection
-	Close      func() error
-}
-
-func NewDB(cfg *config.DB, logger logger.Logger) (*DB, error) {
+func NewDB(cfg *config.DB, logger logger.Logger) (*sql.DB, error) {
 	connCfg, err := pgx.ParseURI(cfg.URI)
 	if err != nil {
 		return nil, fmt.Errorf("parse URI: %w", err)
@@ -31,8 +24,5 @@ func NewDB(cfg *config.DB, logger logger.Logger) (*DB, error) {
 
 	logger.Info("DB connection: success")
 
-	return &DB{
-		Connection: db,
-		Close:      db.Close,
-	}, nil
+	return db, nil
 }
