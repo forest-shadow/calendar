@@ -1,12 +1,12 @@
-package application
+package app
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
 
-	"github.com/forest-shadow/calendar/internal/database"
 	"github.com/forest-shadow/calendar/internal/events"
 	"github.com/forest-shadow/calendar/internal/logger"
 )
@@ -26,7 +26,7 @@ type EventsDomain struct {
 	eventsService eventService
 }
 
-func buildEventsDomain(db database.DBConnection, logger logger.Logger) *EventsDomain {
+func buildEventsDomain(db *sql.DB, logger logger.Logger) *EventsDomain {
 	repo := events.NewEventsRepository(db)
 	eventsService := events.NewEventsService(repo, logger)
 	return &EventsDomain{

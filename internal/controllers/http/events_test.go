@@ -94,7 +94,8 @@ func TestCreateEvent(t *testing.T) {
 			tc.buildStubs(service)
 
 			// Create router and register handler
-			router := NewRouter(zap.NewNop().Sugar(), service)
+			handlers := NewHandlers(zap.NewNop().Sugar(), service)
+			router := NewRouter(handlers)
 
 			// Create request
 			body, err := json.Marshal(tc.event)

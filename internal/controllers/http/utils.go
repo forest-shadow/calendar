@@ -12,7 +12,7 @@ import (
 	"github.com/forest-shadow/calendar/internal/apperrs"
 )
 
-func (h *handlers) handleError(ctx context.Context, w http.ResponseWriter, err error) {
+func (h *Handlers) handleError(ctx context.Context, w http.ResponseWriter, err error) {
 	h.logger.With("operation", chi.RouteContext(ctx).RoutePattern()).Error(err.Error())
 
 	switch {

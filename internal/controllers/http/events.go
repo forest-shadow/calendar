@@ -50,7 +50,7 @@ type eventListFilterDTO struct {
 	To   time.Time `query:"to"`
 }
 
-func (h *handlers) createEvent(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) createEvent(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var newEvent events.Event
@@ -82,7 +82,7 @@ func (h *handlers) createEvent(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
-func (h *handlers) getEvent(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) getEvent(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	eventID := chi.URLParam(r, "id")
@@ -112,7 +112,7 @@ func (h *handlers) getEvent(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func (h *handlers) getEventsList(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) getEventsList(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var eventsDto eventListFilterDTO
@@ -147,7 +147,7 @@ func (h *handlers) getEventsList(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func (h *handlers) updateEvent(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) updateEvent(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	eventID := chi.URLParam(r, "id")
@@ -184,7 +184,7 @@ func (h *handlers) updateEvent(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func (h *handlers) deleteEvent(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) deleteEvent(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	eventID := chi.URLParam(r, "id")

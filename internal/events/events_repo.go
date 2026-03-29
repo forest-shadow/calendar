@@ -2,21 +2,20 @@ package events
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"time"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/georgysavva/scany/v2/dbscan"
 	"github.com/google/uuid"
-
-	"github.com/forest-shadow/calendar/internal/database"
 )
 
 type Repository struct {
-	db database.DBConnection
+	db *sql.DB
 }
 
-func NewEventsRepository(db database.DBConnection) *Repository {
+func NewEventsRepository(db *sql.DB) *Repository {
 	return &Repository{db: db}
 }
 

@@ -1,7 +1,8 @@
-package application
+package app
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 
 	"github.com/forest-shadow/calendar/internal/config"
@@ -16,7 +17,7 @@ type App struct {
 	cfg              *config.Config
 	httpServer       *http.Server
 	logger           logger.Logger
-	db               *database.DB
+	db               *sql.DB
 	eventNotifierJob *jobs.EventNotifierJob
 	eventCleanerJob  *jobs.EventCleanerJob
 }
@@ -38,7 +39,7 @@ func newApp(ctx context.Context) (*App, error) {
 		return nil, fmt.Errorf("create db: %w", err)
 	}
 
-	eventsDomain := buildEventsDomain(db.Connection, appLogger)
+	eventsDomain := buildEventsDomain(db, appLogger)
 
 	eventNotifierJob, err := jobs.NewEventNotifier(ctx, cfg, eventsDomain.eventsService)
 	if err != nil {
@@ -46,7 +47,8 @@ func newApp(ctx context.Context) (*App, error) {
 	}
 	eventCleanerJob := jobs.NewEventCleanerJob(ctx, cfg, eventsDomain.eventsService, logger)
 
-	router := router.NewRouter(appLogger, eventsDomain.eventsService)
+	handlers := router.NewHandlers(appLogger, eventsDomain.eventsService)
+	router := router.NewRouter(handlers)
 	httpServer, err := http.NewServer(&cfg.HTTP, appLogger, router)
 	if err != nil {
 		return nil, fmt.Errorf("create http server: %w", err)
@@ -62,32 +64,16 @@ func newApp(ctx context.Context) (*App, error) {
 	}, nil
 }
 
-func (app *App) startCronJobs() chan error {
-	errCh := make(chan error, 2)
-
-	app.eventNotifierJob.Start(errCh)
-	app.eventCleanerJob.Start(errCh)
-
-	return errCh
-}
-
 func (app *App) start() error {
 	httpConfig := app.cfg.HTTP
 	if err := app.httpServer.Start(&httpConfig); err != nil {
 		return fmt.Errorf("start http server: %w", err)
 	}
 
-	errChan := app.startCronJobs()
+	if err := jobs.RunJobs([]jobs.Job{app.eventNotifierJob, app.eventCleanerJob}); err != nil {
+		return fmt.Errorf("cron jobs: %w", err)
+	}
 
-	go func() {
-		defer close(errChan)
-		for err := range errChan {
-			if err != nil {
-				app.logger.Errorf("event jobs: %w", err)
-				return
-			}
-		}
-	}()
 	app.logger.Infof("Appication started at port: %v", httpConfig.Port)
 	return nil
 }
@@ -118,5 +104,5 @@ func Run(ctx context.Context) error {
 
 	<-ctx.Done()
 
-	return nil
+	return ctx.Err()
 }
